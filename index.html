@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Traditional Chinese Calendar</title>
+		<script src="/lunar.min.js"></script>
+		<style>
+			@font-face {
+				font-family: "notosans-black";
+				src: url(fonts/NotoSans-Black.ttf);
+			}
+
+			@font-face {
+				font-family: "notosansSC-black";
+				src: url(fonts/NotoSansSC-Black.ttf);
+			}
+
+			body {
+				font-family: "notosans-black", serif;
+				background: white;
+				margin: 0;
+				padding: 0;
+				height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: start;
+				color: black;
+			}
+
+			.calendar-container {
+				text-align: center;
+				background: white;
+				border-radius: 20px;
+				padding: 60px 40px;
+				/* border: 2px solid black; */
+				width: 80%;
+				height: 80%;
+				max-width: 80vw;
+				max-height: 80vh;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.lunar-date {
+				font-family: "notosansSC-black", serif;
+				font-size: clamp(30px, 6vw, 8vw);
+				font-weight: 300;
+				margin-bottom: 10px;
+				color: black;
+				opacity: 0.8;
+			}
+
+			.date-display {
+				font-size: clamp(200px, 50vw, 1260px);
+				font-weight: bold;
+				margin-bottom: 20px;
+				line-height: 1;
+				color: black;
+			}
+
+			.day-display {
+				font-family: "notosansSC-black", serif;
+				font-size: clamp(40px, 6vw, 8vw);
+				font-weight: 300;
+				letter-spacing: 2px;
+				color: black;
+			}
+
+			.year-display {
+				font-size: clamp(40px, 6vw, 8vw);
+				font-weight: 300;
+				margin-top: 20px;
+				color: black;
+			}
+
+			.yi-ji-container {
+				margin-top: 30px;
+				display: flex;
+				justify-content: space-between;
+				width: 100%;
+				gap: 20px;
+			}
+
+			.yi-section,
+			.ji-section {
+				flex: 1;
+				text-align: center;
+			}
+
+			.yi-title,
+			.ji-title {
+				font-size: clamp(12px, 4vw, 5vw);
+				font-weight: bold;
+				margin-bottom: 10px;
+				color: #006400;
+			}
+
+			.ji-title {
+				color: #8b0000;
+			}
+
+			.yi-content,
+			.ji-content {
+				font-family: "notosansSC-black", serif;
+				font-size: clamp(12px, 2.5vw, 3vw);
+				line-height: 1.4;
+				color: black;
+			}
+
+			.month-year {
+				font-size: clamp(30px, 8vw, 10vw);
+				margin-bottom: 30px;
+				font-weight: 300;
+				color: black;
+				padding: 15px;
+				border-radius: 0px;
+				border: 6px solid black;
+				border-right: none;
+				border-left: none;
+				width: 100%;
+				text-transform: uppercase;
+			}
+
+			.traditional-border {
+				/* border: 2px solid black; */
+				border-radius: 15px;
+				padding: 20px;
+				margin: 20px 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="calendar-container">
+			<div class="month-year" id="monthYear"></div>
+			<div class="traditional-border">
+				<div class="lunar-date" id="lunarDate"></div>
+				<div class="date-display" id="dateDisplay"></div>
+				<div class="day-display" id="dayDisplay"></div>
+				<div class="year-display" id="yearDisplay"></div>
+				<div class="yi-ji-container">
+					<div class="yi-section">
+						<div class="yi-title">宜</div>
+						<div class="yi-content" id="yiContent"></div>
+					</div>
+					<div class="ji-section">
+						<div class="ji-title">忌</div>
+						<div class="ji-content" id="jiContent"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			// Lunar calendar conversion functions
+			function convertToChineseLunarFormat(month, day) {
+				// Convert numeric month to Chinese lunar month names
+				const lunarMonths = {
+					1: "正月",
+					2: "二月",
+					3: "三月",
+					4: "四月",
+					5: "五月",
+					6: "六月",
+					7: "七月",
+					8: "八月",
+					9: "九月",
+					10: "十月",
+					11: "冬月",
+					12: "腊月",
+				};
+
+				// Convert numeric day to Chinese lunar day names
+				const lunarDays = {
+					1: "初一",
+					2: "初二",
+					3: "初三",
+					4: "初四",
+					5: "初五",
+					6: "初六",
+					7: "初七",
+					8: "初八",
+					9: "初九",
+					10: "初十",
+					11: "十一",
+					12: "十二",
+					13: "十三",
+					14: "十四",
+					15: "十五",
+					16: "十六",
+					17: "十七",
+					18: "十八",
+					19: "十九",
+					20: "二十",
+					21: "廿一",
+					22: "廿二",
+					23: "廿三",
+					24: "廿四",
+					25: "廿五",
+					26: "廿六",
+					27: "廿七",
+					28: "廿八",
+					29: "廿九",
+					30: "三十",
+				};
+
+				const chineseMonth = lunarMonths[month] || month;
+				const chineseDay = lunarDays[day] || day;
+
+				return `${chineseMonth}${chineseDay}`;
+			}
+
+			function getLunarDate(date) {
+				try {
+					// Use Intl.DateTimeFormat with Chinese calendar
+					const chineseFormatter = new Intl.DateTimeFormat(
+						"zh-CN-u-ca-chinese",
+						{
+							day: "numeric",
+							month: "numeric",
+							year: "numeric",
+						}
+					);
+
+					const parts = chineseFormatter.formatToParts(date);
+					let month = "";
+					let day = "";
+
+					parts.forEach((part) => {
+						if (part.type === "month") {
+							month = part.value;
+						} else if (part.type === "day") {
+							day = part.value;
+						}
+					});
+
+					return convertToChineseLunarFormat(month, day);
+				} catch (error) {
+					console.log("Chinese calendar not supported, using fallback");
+					// Fallback to simplified calculation if Chinese calendar is not supported
+					const lunarMonths = [
+						"正月",
+						"二月",
+						"三月",
+						"四月",
+						"五月",
+						"六月",
+						"七月",
+						"八月",
+						"九月",
+						"十月",
+						"冬月",
+						"腊月",
+					];
+
+					const lunarDays = [
+						"初一",
+						"初二",
+						"初三",
+						"初四",
+						"初五",
+						"初六",
+						"初七",
+						"初八",
+						"初九",
+						"初十",
+						"十一",
+						"十二",
+						"十三",
+						"十四",
+						"十五",
+						"十六",
+						"十七",
+						"十八",
+						"十九",
+						"二十",
+						"廿一",
+						"廿二",
+						"廿三",
+						"廿四",
+						"廿五",
+						"廿六",
+						"廿七",
+						"廿八",
+						"廿九",
+						"三十",
+					];
+
+					const baseDate = new Date(2025, 0, 1);
+					const daysDiff = Math.floor(
+						(date - baseDate) / (1000 * 60 * 60 * 24)
+					);
+					const lunarMonthIndex = Math.floor((daysDiff + 60) / 30) % 12;
+					const lunarDay = (daysDiff + 20) % 30;
+
+					return `${lunarMonths[lunarMonthIndex]}${lunarDays[lunarDay]}`;
+				}
+			}
+
+			function updateCalendar() {
+				const now = new Date();
+
+				// Get date components
+				const day = now.getDate();
+				const month = now.getMonth();
+				const year = now.getFullYear();
+				const dayOfWeek = now.getDay();
+
+				// Month names
+				const months = [
+					"January",
+					"February",
+					"March",
+					"April",
+					"May",
+					"June",
+					"July",
+					"August",
+					"September",
+					"October",
+					"November",
+					"December",
+				];
+
+				// Day names in traditional style
+				const days = [
+					"Sunday",
+					"Monday",
+					"Tuesday",
+					"Wednesday",
+					"Thursday",
+					"Friday",
+					"Saturday",
+				];
+
+				// Chinese day names (optional - you can uncomment if you want Chinese characters)
+				const chineseDays = [
+					"星期日",
+					"星期一",
+					"星期二",
+					"星期三",
+					"星期四",
+					"星期五",
+					"星期六",
+				];
+
+				// Get lunar date using Intl API or fallback
+				let lunarDateStr = "";
+				lunarDateStr = getLunarDate(now);
+
+				// Get Yi and Ji using lunar-javascript library
+				let yiList = [];
+				let jiList = [];
+
+				var d = Lunar.fromDate(new Date());
+
+				// 宜
+				yiList = d.getDayYi();
+
+				// 忌
+				jiList = d.getDayJi();
+
+				// Update the display
+				document.getElementById(
+					"monthYear"
+				).textContent = `${months[month]} ${year}`;
+				document.getElementById("lunarDate").textContent = lunarDateStr;
+				document.getElementById("dateDisplay").textContent = day;
+				document.getElementById(
+					"dayDisplay"
+				).textContent = `${days[dayOfWeek]} ${chineseDays[dayOfWeek]}`;
+				document.getElementById("yearDisplay").textContent = "";
+				document.getElementById("yiContent").textContent = yiList.length
+					? yiList.join(" ")
+					: "无特别宜事";
+				document.getElementById("jiContent").textContent = jiList.length
+					? jiList.join(" ")
+					: "无特别忌事";
+			}
+
+			// Update calendar when page loads
+			updateCalendar();
+
+			// Optional: Update every minute to keep it current
+			setInterval(updateCalendar, 60000);
+		</script>
+	</body>
+</html>
